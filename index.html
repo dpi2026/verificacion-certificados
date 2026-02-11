@@ -1,52 +1,211 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="es">
 <head>
-    <title>Verificación de Certificados - XIII Curso DPI 2026</title>
-    <meta charset="UTF-8">
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f6f9;
-            text-align: center;
-            padding: 40px;
-        }
-        .box {
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            max-width: 500px;
-            margin: auto;
-            box-shadow: 0px 0px 15px rgba(0,0,0,0.1);
-        }
-        input {
-            padding: 10px;
-            width: 80%;
-            margin: 15px 0;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #0b3c5d;
-            color: white;
-            border: none;
-            border-radius: 5px;
-        }
-    </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Verificación de Certificados - XIII Curso DPI 2026</title>
+  <style>
+    body{font-family:Arial,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:#f4f6f9;margin:0;padding:28px;color:#111}
+    .wrap{max-width:760px;margin:0 auto}
+    .card{background:#fff;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08);padding:22px}
+    h1{margin:0 0 6px;font-size:20px}
+    p{margin:0 0 14px;color:#444;line-height:1.35}
+    .row{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+    input{flex:1;min-width:240px;padding:12px 12px;border:1px solid #d6dbe5;border-radius:10px;font-size:14px;outline:none}
+    button{padding:12px 14px;border:0;border-radius:10px;background:#0b3c5d;color:#fff;font-weight:700;cursor:pointer}
+    button:disabled{opacity:.6;cursor:not-allowed}
+    .hint{font-size:12px;color:#666;margin-top:8px}
+    .status{margin-top:12px;font-size:13px}
+    .ok{color:#0a7a2f}
+    .bad{color:#b00020}
+    .table{margin-top:14px;border-top:1px solid #eef1f6;padding-top:12px}
+    .kv{display:grid;grid-template-columns:190px 1fr;gap:8px 10px;font-size:14px}
+    .k{color:#555}
+    .v{font-weight:600}
+    .footer{margin-top:16px;font-size:12px;color:#666}
+    code{background:#eef2ff;padding:2px 6px;border-radius:6px}
+  </style>
 </head>
+
 <body>
+  <div class="wrap">
+    <div class="card">
+      <h1>Verificación de Certificados</h1>
+      <p>XIII Curso de Diagnóstico por Imágenes 2026</p>
 
-<div class="box">
-    <h2>Verificación Oficial de Certificados</h2>
-    <p>XIII Curso de Diagnóstico por Imágenes 2026</p>
-    <p>Avalado por el Colegio Médico del Perú (CMP)</p>
+      <div class="row">
+        <input id="code" placeholder="Ingrese código (ej: DPI2026-NOUNMSM-BAS-001)" autocomplete="off" />
+        <button id="btn">Verificar</button>
+      </div>
 
-    <input type="text" placeholder="Ingrese código del certificado">
-    <br>
-    <button>Verificar</button>
+      <div class="hint">
+        * Si el código es válido, se mostrará el estado y los datos asociados.
+      </div>
 
-    <p style="margin-top:20px; font-size:12px;">
-        Sistema oficial de validación digital.
-    </p>
-</div>
+      <div id="status" class="status"></div>
+      <div id="result" class="table" style="display:none"></div>
 
+      <div class="footer">
+        Sistema de validación digital.
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ✅ TU ENDPOINT (Apps Script)
+  const API_URL = "https://script.google.com/macros/s/AKfycbxBbYQtlZq917ITNLf-KffefkwTnO7XPCdk-TnVPfwXjbraDWyWZT0rjkvoDbtM0m0L/exec";
+
+  // Cache en memoria para no volver a descargar cada búsqueda
+  let cachedData = null;
+  let cachedIndex = null; // Map(code -> row)
+
+  const $code   = document.getElementById("code");
+  const $btn    = document.getElementById("btn");
+  const $status = document.getElementById("status");
+  const $result = document.getElementById("result");
+
+  function setStatus(msg, kind="") {
+    $status.className = "status " + (kind || "");
+    $status.textContent = msg || "";
+  }
+
+  function showResult(row) {
+    // Ajusta campos según tu JSON real
+    const fields = [
+      ["Código", row.codigo],
+      ["Apellidos", row.apellidos],
+      ["Nombres", row.nombres],
+      ["DNI", row.dni_oculto || row.dni || ""],
+      ["Modalidad de inscripción", row.modalidad_inscripcion],
+      ["Modalidad elegida", row.modalidad_elegida],
+      ["Estado", row.estado],
+      ["Tipo de certificado", row.tipo_certificado],
+      ["Fecha de emisión", formatDate(row.fecha_emision)]
+    ];
+
+    $result.innerHTML = `
+      <div class="kv">
+        ${fields.map(([k,v]) => `
+          <div class="k">${escapeHtml(k)}</div>
+          <div class="v">${escapeHtml(String(v ?? ""))}</div>
+        `).join("")}
+      </div>
+    `;
+    $result.style.display = "block";
+  }
+
+  function hideResult() {
+    $result.style.display = "none";
+    $result.innerHTML = "";
+  }
+
+  function escapeHtml(s) {
+    return s.replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+    }[c]));
+  }
+
+  function formatDate(val) {
+    if (!val) return "";
+    // Si viene como "2026-02-27T05:00:00.000Z"
+    const d = new Date(val);
+    if (isNaN(d.getTime())) return String(val);
+    const yyyy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  // ===== MODO A: FETCH (si CORS permite) =====
+  async function loadDataByFetch() {
+    const res = await fetch(API_URL, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return await res.json();
+  }
+
+  // ===== MODO B: JSONP fallback (si CORS bloquea) =====
+  // Requiere que tu Apps Script soporte ?callback=xxx
+  function loadDataByJsonp() {
+    return new Promise((resolve, reject) => {
+      const cb = "cb_" + Math.random().toString(36).slice(2);
+      const script = document.createElement("script");
+      const timeout = setTimeout(() => {
+        cleanup();
+        reject(new Error("JSONP timeout"));
+      }, 12000);
+
+      function cleanup() {
+        clearTimeout(timeout);
+        delete window[cb];
+        if (script && script.parentNode) script.parentNode.removeChild(script);
+      }
+
+      window[cb] = (data) => { cleanup(); resolve(data); };
+      script.onerror = () => { cleanup(); reject(new Error("JSONP error")); };
+      script.src = API_URL + (API_URL.includes("?") ? "&" : "?") + "callback=" + cb;
+      document.body.appendChild(script);
+    });
+  }
+
+  async function loadData() {
+    if (cachedData && cachedIndex) return;
+
+    setStatus("Cargando base de certificados…");
+    $btn.disabled = true;
+
+    try {
+      // 1) intenta fetch
+      const data = await loadDataByFetch();
+      cachedData = data;
+    } catch (e) {
+      // 2) fallback JSONP
+      try {
+        const data = await loadDataByJsonp();
+        cachedData = data;
+      } catch (e2) {
+        throw new Error("No se pudo cargar la base (CORS/permiso).");
+      }
+    } finally {
+      $btn.disabled = false;
+    }
+
+    // Indexar por código para búsqueda instantánea
+    cachedIndex = new Map();
+    const arr = Array.isArray(cachedData?.data) ? cachedData.data : [];
+    for (const row of arr) {
+      if (row && row.codigo) cachedIndex.set(String(row.codigo).trim().toUpperCase(), row);
+    }
+
+    setStatus(`Base cargada: ${cachedData?.total ?? arr.length} registros.`, "ok");
+  }
+
+  async function verify() {
+    hideResult();
+    const code = String($code.value || "").trim().toUpperCase();
+    if (!code) {
+      setStatus("Ingrese un código para verificar.", "bad");
+      return;
+    }
+
+    try {
+      await loadData();
+      const row = cachedIndex.get(code);
+
+      if (!row) {
+        setStatus("Código no encontrado. Verifique que esté bien escrito.", "bad");
+        return;
+      }
+
+      setStatus("✅ Código válido.", "ok");
+      showResult(row);
+
+    } catch (err) {
+      setStatus("Error: " + (err.message || String(err)), "bad");
+    }
+  }
+
+  $btn.addEventListener("click", verify);
+  $code.addEventListener("keydown", (e) => { if (e.key === "Enter") verify(); });
+</script>
 </body>
 </html>
