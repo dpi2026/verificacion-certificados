@@ -6,9 +6,9 @@
   <title>Verificación de Certificados - XIII Curso DPI 2026</title>
   <style>
     body{font-family:Arial,sans-serif;background:#f4f6f9;text-align:center;padding:40px}
-    .box{background:#fff;padding:28px;border-radius:14px;max-width:620px;margin:auto;box-shadow:0 8px 24px rgba(0,0,0,.08)}
-    input{padding:12px;width:92%;max-width:520px;margin:10px 0;border:1px solid #cfd6df;border-radius:10px;font-size:16px}
-    button{padding:12px 22px;background:#0b3c5d;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:16px;margin-top:6px}
+    .box{background:#fff;padding:28px;border-radius:14px;max-width:560px;margin:auto;box-shadow:0 8px 24px rgba(0,0,0,.08)}
+    input{padding:12px;width:92%;max-width:420px;margin:14px 0 10px;border:1px solid #cfd6df;border-radius:10px;font-size:16px}
+    button{padding:12px 22px;background:#0b3c5d;color:#fff;border:none;border-radius:10px;cursor:pointer;font-size:16px}
     button:disabled{opacity:.6;cursor:not-allowed}
     .msg{margin-top:16px;padding:14px;border-radius:12px;text-align:left;border:1px solid #e6e9ee;background:#fbfbfc}
     .error{border-color:#ffd4d4;background:#fff5f5;color:#b00020}
@@ -17,21 +17,18 @@
     .row:last-child{border-bottom:none}
     .k{color:#455;font-weight:700;min-width:190px}
     .v{color:#111;text-align:right;flex:1;word-break:break-word}
-    .hint{font-size:12px;color:#667;margin-top:14px}
-    .sep{margin:14px auto;border-top:1px solid #eef1f6;max-width:520px}
+    .hint{font-size:12px;color:#667;margin-top:12px}
   </style>
 </head>
+
 <body>
   <div class="box">
     <h2>Verificación Oficial de Certificados</h2>
     <p>XIII Curso de Diagnóstico por Imágenes 2026</p>
 
-    <div class="hint">📌 Si tiene el QR, escanéelo. Si no, verifique por <b>Código</b> o por <b>DNI</b>.</div>
+    <div class="hint">Ingrese su DNI para verificar su certificado.</div>
 
-    <input id="codigo" placeholder="Código (ej: DPI2026-NOUNMSM-BAS-001)" />
-    <div class="sep"></div>
     <input id="dni" placeholder="DNI (8 dígitos)" inputmode="numeric" />
-
     <br />
     <button id="btn" onclick="verificar()">Verificar</button>
 
@@ -41,6 +38,7 @@
   </div>
 
 <script>
+  // ✅ Tu Apps Script Web App
   const API_URL = "https://script.google.com/macros/s/AKfycbzaKAqCZO-kTJufqeQJbP725Wdj4Og-2KeDHyF8sMoE1yivyzNjgHrWnOxPkw7G-Cve/exec";
   const $ = (id) => document.getElementById(id);
 
@@ -69,20 +67,10 @@
   }
 
   async function verificar(){
-    const codigo = $("codigo").value.trim().toUpperCase();
     const dni = $("dni").value.trim();
 
-    // Validación mínima antes de consultar
-    if(!codigo && !dni){
-      show("Ingrese un <b>Código</b> o su <b>DNI</b>.", "error");
-      return;
-    }
-    if(dni && !/^\d{8}$/.test(dni)){
+    if(!/^\d{8}$/.test(dni)){
       show("El DNI debe tener <b>8 dígitos</b>.", "error");
-      return;
-    }
-    if(codigo && !codigo.startsWith("DPI2026-")){
-      show("El código debe iniciar con <b>DPI2026-</b>.", "error");
       return;
     }
 
@@ -91,10 +79,7 @@
     btn.textContent = "Verificando...";
 
     try{
-      const url = codigo
-        ? `${API_URL}?codigo=${encodeURIComponent(codigo)}`
-        : `${API_URL}?dni=${encodeURIComponent(dni)}`;
-
+      const url = `${API_URL}?dni=${encodeURIComponent(dni)}`;
       const res = await fetch(url, { method:"GET", cache:"no-store" });
       const text = await res.text();
 
@@ -109,7 +94,6 @@
         return;
       }
 
-      // Mostrar datos (usa encabezados exactos de tu hoja)
       const html =
         `<b>✅ Certificado válido</b><br><br>` +
         row("Código", data["Código"]) +
@@ -122,9 +106,8 @@
         row("Tipo de certificado", data["Tipo de Certificado"]) +
         row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
-      // Si está ANULADO, lo marcamos en rojo
       const estado = String(data["Estado"] || "").toLowerCase();
-      const cls = (estado.includes("anulado")) ? "error" : "ok";
+      const cls = estado.includes("anulado") ? "error" : "ok";
       show(html, cls);
 
     }catch(err){
@@ -135,17 +118,6 @@
     }
   }
 
-  // Autoverificación si viene con ?codigo=...
-  (function auto(){
-    const params = new URLSearchParams(window.location.search);
-    const c = params.get("codigo");
-    if(c){
-      $("codigo").value = c.toUpperCase().trim();
-      verificar();
-    }
-  })();
-
-  // Enter = verificar
   document.addEventListener("keydown", (e) => {
     if(e.key === "Enter") verificar();
   });
