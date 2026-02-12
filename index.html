@@ -21,13 +21,22 @@
 
     *{box-sizing:border-box}
 
+    /* ✅ NUEVO: evita "franjas" del fondo */
+    html, body{height:100%}
+
     body{
       font-family: Arial, sans-serif;
-      background: linear-gradient(180deg, #ffffff 0%, var(--c-mist) 120%);
       text-align:center;
       padding:40px 16px;
       margin:0;
       color:#111;
+
+      /* ✅ NUEVO: fondo suave sin cortes */
+      background:
+        radial-gradient(900px 500px at 20% 10%, rgba(129,195,227,.18), transparent 60%),
+        radial-gradient(900px 500px at 80% 30%, rgba(185,207,219,.35), transparent 65%),
+        linear-gradient(180deg, #ffffff 0%, var(--c-mist) 100%);
+      background-attachment: fixed;
     }
 
     .box{
@@ -50,12 +59,13 @@
       color:#fff;
     }
 
+    /* ✅ NUEVO: logo circular sin "bloque" blanco grande */
     .logo{
-      width:52px;
-      height:52px;
-      border-radius:12px;
-      background:#fff;
-      padding:6px;
+      width:56px;
+      height:56px;
+      border-radius:50%;
+      background:transparent;
+      padding:0;
       flex:0 0 auto;
       display:flex;
       align-items:center;
@@ -63,10 +73,13 @@
     }
 
     .logo img{
-      width:100%;
-      height:100%;
-      object-fit:contain;
+      width:56px;
+      height:56px;
+      object-fit:cover;
       display:block;
+      border-radius:50%;
+      border:2px solid rgba(255,255,255,.92); /* borde blanco suave */
+      box-shadow:0 6px 16px rgba(0,0,0,.20);
     }
 
     .topbar .t1{
@@ -211,7 +224,6 @@
       <div class="hint">DNI (8 dígitos). Ejemplo: 12345678</div>
 
       <input
- Grove
         id="dni"
         placeholder="DNI (8 dígitos)"
         inputmode="numeric"
