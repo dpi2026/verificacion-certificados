@@ -199,6 +199,45 @@
       color:#6a7785;
       font-size:12px;
     }
+    /* ✅ Responsive: móvil */
+@media (max-width: 520px){
+
+  body{ padding:18px 12px; }
+
+  .topbar{
+    padding:14px 14px;
+    gap:12px;
+  }
+
+  /* logo un poco más chico en móvil para que no empuje el título */
+  .logo{ width:72px; height:72px; }
+  .logo img{ width:72px; height:72px; }
+
+  .content{ padding:20px 14px 16px; }
+
+  /* ✅ La clave: filas en columna */
+  .row{
+    flex-direction: column;
+    align-items: flex-start;
+    gap:6px;
+  }
+
+  .k{
+    min-width: 0;         /* quita el “bloque fijo” */
+    text-align:left;
+  }
+
+  .v{
+    width: 100%;
+    text-align:left;      /* antes estaba right */
+    white-space: normal;  /* permite saltos normales */
+    word-break: break-word;
+  }
+
+  /* input y botón ocupan mejor el ancho */
+  input{ max-width: 100%; }
+  button{ width: 100%; max-width: 440px; }
+}
   </style>
 </head>
 
