@@ -150,7 +150,7 @@
           row("Modalidad elegida", data["Modalidad elegida"]) +
           row("Estado", data["Estado"]) +
           row("Tipo de certificado", data["Tipo de Certificado"]) +
-          row("Fecha de emisión", data["Fecha de emisión"]);
+          row("Fecha de emisión", new Date(data["Fecha de emisión"]).toLocaleDateString("es-PE"));
 
         showBox(html, "ok");
 
