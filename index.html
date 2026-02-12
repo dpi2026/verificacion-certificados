@@ -28,7 +28,13 @@
 
     <div class="hint">Ingrese su DNI para verificar su certificado.</div>
 
-    <input id="dni" placeholder="DNI (8 dígitos)" inputmode="numeric" />
+    <input
+      id="dni"
+      placeholder="DNI (8 dígitos)"
+      inputmode="numeric"
+      maxlength="8"
+      autocomplete="off"
+    />
     <br />
     <button id="btn" onclick="verificar()">Verificar</button>
 
@@ -38,7 +44,7 @@
   </div>
 
 <script>
-  // ✅ Tu Apps Script Web App
+  // ✅ Tu Apps Script Web App (URL /exec)
   const API_URL = "https://script.google.com/macros/s/AKfycbzaKAqCZO-kTJufqeQJbP725Wdj4Og-2KeDHyF8sMoE1yivyzNjgHrWnOxPkw7G-Cve/exec";
   const $ = (id) => document.getElementById(id);
 
@@ -65,6 +71,16 @@
     if(!isNaN(d.getTime())) return d.toLocaleDateString("es-PE");
     return String(val);
   }
+
+  // ✅ UX: solo números, max 8
+  $("dni").addEventListener("input", () => {
+    $("dni").value = $("dni").value.replace(/\D/g, "").slice(0, 8);
+  });
+
+  // ✅ Enter SOLO funciona en el input
+  $("dni").addEventListener("keydown", (e) => {
+    if(e.key === "Enter") verificar();
+  });
 
   async function verificar(){
     const dni = $("dni").value.trim();
@@ -95,7 +111,7 @@
       }
 
       const html =
-        `<b>✅ Certificado válido</b><br><br>` +
+        `<b>✅ Certificado encontrado</b><br><br>` +
         row("Código", data["Código"]) +
         row("Apellidos", data["Apellidos completos"]) +
         row("Nombres", data["Nombres completos"]) +
@@ -107,7 +123,7 @@
         row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
       const estado = String(data["Estado"] || "").toLowerCase();
-      const cls = estado.includes("anulado") ? "error" : "ok";
+      const cls = (estado.includes("valido") || estado.includes("válido")) ? "ok" : "error";
       show(html, cls);
 
     }catch(err){
@@ -117,10 +133,6 @@
       btn.textContent = "Verificar";
     }
   }
-
-  document.addEventListener("keydown", (e) => {
-    if(e.key === "Enter") verificar();
-  });
 </script>
 </body>
 </html>
