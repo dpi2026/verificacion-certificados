@@ -50,51 +50,51 @@
     }
 
     /* HEADER */
-.topbar{
-  display:flex;
-  align-items:center;
-  gap:16px;
-  padding:18px 20px;
-  background: var(--c-navy);
-  color:#fff;
-}
+    .topbar{
+      display:flex;
+      align-items:center;
+      gap:16px;
+      padding:18px 20px;
+      background: var(--c-navy);
+      color:#fff;
+    }
 
-/* ✅ Logo MÁS grande pero elegante */
-.logo{
-  width:92px;
-  height:92px;
-  border-radius:50%;
-  flex:0 0 auto;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-}
+    /* ✅ Logo MÁS grande pero elegante */
+    .logo{
+      width:92px;
+      height:92px;
+      border-radius:50%;
+      flex:0 0 auto;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
 
-.logo img{
-  width:92px;
-  height:92px;
-  object-fit:cover;
-  display:block;
-  border-radius:50%;
-  border:3px solid rgba(255,255,255,.92);
-  box-shadow:0 10px 22px rgba(0,0,0,.28);
-}
+    .logo img{
+      width:92px;
+      height:92px;
+      object-fit:cover;
+      display:block;
+      border-radius:50%;
+      border:3px solid rgba(255,255,255,.92);
+      box-shadow:0 10px 22px rgba(0,0,0,.28);
+    }
 
-/* Un poquito más de jerarquía tipográfica */
-.topbar .t1{
-  font-weight:800;
-  font-size:18px;
-  line-height:1.1;
-  margin:0;
-  text-align:left;
-}
+    /* Un poquito más de jerarquía tipográfica */
+    .topbar .t1{
+      font-weight:800;
+      font-size:18px;
+      line-height:1.1;
+      margin:0;
+      text-align:left;
+    }
 
-.topbar .t2{
-  margin:5px 0 0;
-  font-size:13px;
-  opacity:.9;
-  text-align:left;
-}
+    .topbar .t2{
+      margin:5px 0 0;
+      font-size:13px;
+      opacity:.9;
+      text-align:left;
+    }
 
     /* CONTENIDO */
     .content{
@@ -199,45 +199,46 @@
       color:#6a7785;
       font-size:12px;
     }
+
     /* ✅ Responsive: móvil */
-@media (max-width: 520px){
+    @media (max-width: 520px){
 
-  body{ padding:18px 12px; }
+      body{ padding:18px 12px; }
 
-  .topbar{
-    padding:14px 14px;
-    gap:12px;
-  }
+      .topbar{
+        padding:14px 14px;
+        gap:12px;
+      }
 
-  /* logo un poco más chico en móvil para que no empuje el título */
-  .logo{ width:72px; height:72px; }
-  .logo img{ width:72px; height:72px; }
+      /* logo un poco más chico en móvil para que no empuje el título */
+      .logo{ width:72px; height:72px; }
+      .logo img{ width:72px; height:72px; }
 
-  .content{ padding:20px 14px 16px; }
+      .content{ padding:20px 14px 16px; }
 
-  /* ✅ La clave: filas en columna */
-  .row{
-    flex-direction: column;
-    align-items: flex-start;
-    gap:6px;
-  }
+      /* ✅ La clave: filas en columna */
+      .row{
+        flex-direction: column;
+        align-items: flex-start;
+        gap:6px;
+      }
 
-  .k{
-    min-width: 0;         /* quita el “bloque fijo” */
-    text-align:left;
-  }
+      .k{
+        min-width: 0;         /* quita el “bloque fijo” */
+        text-align:left;
+      }
 
-  .v{
-    width: 100%;
-    text-align:left;      /* antes estaba right */
-    white-space: normal;  /* permite saltos normales */
-    word-break: break-word;
-  }
+      .v{
+        width: 100%;
+        text-align:left;      /* antes estaba right */
+        white-space: normal;  /* permite saltos normales */
+        word-break: break-word;
+      }
 
-  /* input y botón ocupan mejor el ancho */
-  input{ max-width: 100%; }
-  button{ width: 100%; max-width: 440px; }
-}
+      /* input y botón ocupan mejor el ancho */
+      input{ max-width: 100%; }
+      button{ width: 100%; max-width: 440px; }
+    }
   </style>
 </head>
 
@@ -257,15 +258,13 @@
 
     <div class="content">
       <h2>Validación de Certificado</h2>
-      <p class="sub">Ingrese su DNI para consultar el estado del certificado.</p>
+      <p class="sub">Ingrese el <b>código</b> del certificado para consultar su estado.</p>
 
-      <div class="hint">DNI (8 dígitos). Ejemplo: 12345678</div>
+      <div class="hint">Código. Ejemplo: DPI2026-NOUNMSM-PRO-001</div>
 
       <input
-        id="dni"
-        placeholder="DNI (8 dígitos)"
-        inputmode="numeric"
-        maxlength="8"
+        id="codigo"
+        placeholder="Código del certificado"
         autocomplete="off"
       />
       <br />
@@ -306,21 +305,16 @@
       return String(val);
     }
 
-    // ✅ UX: solo números, max 8
-    $("dni").addEventListener("input", () => {
-      $("dni").value = $("dni").value.replace(/\D/g, "").slice(0, 8);
-    });
-
     // ✅ Enter SOLO funciona en el input
-    $("dni").addEventListener("keydown", (e) => {
+    $("codigo").addEventListener("keydown", (e) => {
       if(e.key === "Enter") verificar();
     });
 
     async function verificar(){
-      const dni = $("dni").value.trim();
+      const codigo = $("codigo").value.trim();
 
-      if(!/^\d{8}$/.test(dni)){
-        show("El DNI debe tener <b>8 dígitos</b>.", "error");
+      if(!codigo){
+        show("Debe ingresar el <b>código del certificado</b>.", "error");
         return;
       }
 
@@ -329,7 +323,7 @@
       btn.textContent = "Verificando...";
 
       try{
-        const url = `${API_URL}?dni=${encodeURIComponent(dni)}`;
+        const url = `${API_URL}?codigo=${encodeURIComponent(codigo)}`;
         const res = await fetch(url, { method:"GET", cache:"no-store" });
         const text = await res.text();
 
@@ -349,7 +343,6 @@
           row("Código", data["Código"]) +
           row("Apellidos", data["Apellidos completos"]) +
           row("Nombres", data["Nombres completos"]) +
-          row("DNI", data["DNI oculto"]) +
           row("Tipo de usuario", data["Tipo de usuario"]) +
           row("Modalidad elegida", data["Modalidad elegida"]) +
           row("Estado", data["Estado"]) +
