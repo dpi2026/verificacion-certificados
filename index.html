@@ -373,8 +373,26 @@ $("codigo").addEventListener("keydown", function(e){
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
         }
 
-        // Fondo verde para encontrados
-        show(html, "ok");
+        // 🔴🟢 Color según estado (solo participantes)
+let clase = "ok";
+
+const estado = String(data["Estado"] || "").trim().toLowerCase();
+const esDocente = tipo.includes("docente");
+const esComite = (tipo.includes("comité") || tipo.includes("comite"));
+
+if (!esDocente && !esComite) {
+  // Participantes: verde si válido, rojo si inválido
+  if (estado.includes("inválido") || estado.includes("invalido")) {
+    clase = "error";
+  } else {
+    clase = "ok";
+  }
+} else {
+  // Docente y comité: siempre verde si existe registro
+  clase = "ok";
+}
+
+show(html, clase);
 
       } catch(err){
         show("Error de conexión.", "error");
