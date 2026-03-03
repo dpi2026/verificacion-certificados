@@ -338,16 +338,54 @@
           return;
         }
 
-        const html =
-          `<b>✅ Certificado encontrado</b><br><br>` +
-          row("Código", data["Código"]) +
-          row("Apellidos", data["Apellidos completos"]) +
-          row("Nombres", data["Nombres completos"]) +
-          row("Tipo de usuario", data["Tipo de usuario"]) +
-          row("Modalidad elegida", data["Modalidad elegida"]) +
-          row("Estado", data["Estado"]) +
-          row("Tipo de certificado", data["Tipo de Certificado"]) +
-          row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+        // ✅ NUEVO: armado dinámico según "Tipo de Certificado" (sin cambiar diseño)
+        const tipo = String(data["Tipo de Certificado"] || "").trim().toLowerCase();
+
+        let html = `<b>✅ Certificado encontrado</b><br><br>` + row("Código", data["Código"]);
+
+        // 1) DOCENTE PONENTE
+        if (tipo.includes("docente")) {
+          const titulo = String(data["Título"] || "").trim(); // "Dr." / "Dra."
+          const nombreDoc = [titulo, data["Nombres completos"], data["Apellidos completos"]]
+            .filter(Boolean)
+            .map(x => String(x).trim())
+            .join(" ");
+
+          const rne = String(data["RNE"] || "").trim();
+          const mostrarRne = rne && !rne.toLowerCase().includes("no registra");
+
+          html +=
+            row("Docente", nombreDoc) +
+            row("Especialidad", data["Especialidad"]) +
+            row("CMP", data["CMP"]) +
+            (mostrarRne ? row("RNE", rne) : "") +
+            row("Tema dictado", data["Tema dictado"]) +
+            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+
+        // 2) MIEMBRO DEL COMITÉ ORGANIZADOR
+        } else if (tipo.includes("comité") || tipo.includes("comite")) {
+          const nombre = [data["Nombres completos"], data["Apellidos completos"]]
+            .filter(Boolean)
+            .map(x => String(x).trim())
+            .join(" ");
+
+          html +=
+            row("Miembro", nombre) +
+            row("Cargo", data["Cargo"]) +
+            row("Tipo de certificado", data["Tipo de Certificado"]) +
+            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+
+        // 3) PARTICIPANTES (APROBADO / ASISTENTE)
+        } else {
+          html +=
+            row("Apellidos", data["Apellidos completos"]) +
+            row("Nombres", data["Nombres completos"]) +
+            row("Tipo de usuario", data["Tipo de usuario"]) +
+            row("Modalidad elegida", data["Modalidad elegida"]) +
+            row("Estado", data["Estado"]) +
+            row("Tipo de certificado", data["Tipo de Certificado"]) +
+            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+        }
 
         const estado = String(data["Estado"] || "").toLowerCase();
         const cls = (estado.includes("valido") || estado.includes("válido")) ? "ok" : "error";
