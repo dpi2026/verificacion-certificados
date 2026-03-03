@@ -177,6 +177,13 @@
       flex:1;
       word-break:break-word;
     }
+    .footer{
+  padding:12px 18px 16px;
+  color:#6a7785;
+  font-size:12px;
+  text-align:center;
+  margin-top:8px;
+}
   </style>
 </head>
 
@@ -282,12 +289,12 @@
           return;
         }
 
-        const tipo = String(data["Tipo de Certificado"] || "").toLowerCase();
+        const tipo = String(data["Tipo de Certificado"] || "").trim().toLowerCase();
         let html = `<b>✅ Certificado encontrado</b><br><br>` +
                    row("Código", data["Código"]);
 
+        // DOCENTE
         if (tipo.includes("docente")) {
-
           const titulo = data["Título"] || "";
           const nombreDoc = `${titulo} ${data["Nombres completos"]} ${data["Apellidos completos"]}`.trim();
           const rne = data["RNE"];
@@ -300,10 +307,28 @@
             rowHtml("Tema dictado", temasToListHtml(data["Tema dictado"])) +
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
+        // COMITÉ
+        } else if (tipo.includes("comité") || tipo.includes("comite")) {
+          const nombre = `${data["Nombres completos"] || ""} ${data["Apellidos completos"] || ""}`.trim();
+
+          html +=
+            row("Miembro", nombre) +
+            row("Cargo", data["Cargo"]) +
+            row("Tipo de certificado", data["Tipo de Certificado"]) +
+            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+
+        // PARTICIPANTES (Opción A: minimalista)
         } else {
-          html += row("Tipo de certificado", data["Tipo de Certificado"]);
+          const nombre = `${data["Nombres completos"] || ""} ${data["Apellidos completos"] || ""}`.trim();
+
+          html +=
+            row("Participante", nombre) +
+            row("Estado", data["Estado"]) +
+            row("Tipo de certificado", data["Tipo de Certificado"]) +
+            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
         }
 
+        // Fondo verde para encontrados
         show(html, "ok");
 
       } catch(err){
