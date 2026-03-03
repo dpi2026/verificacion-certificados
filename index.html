@@ -7,10 +7,10 @@
 
   <style>
     :root{
-      --c-navy:#172736;   /* principal */
-      --c-blue:#426583;   /* botones */
-      --c-sky:#81c3e3;    /* acento */
-      --c-mist:#b9cfdb;   /* fondo suave */
+      --c-navy:#172736;
+      --c-blue:#426583;
+      --c-sky:#81c3e3;
+      --c-mist:#b9cfdb;
       --ok-bg:#f3fff6;
       --ok-border:#cfead6;
       --ok-text:#0b5d2a;
@@ -20,7 +20,6 @@
     }
 
     *{box-sizing:border-box}
-
     html, body{height:100%}
 
     body{
@@ -29,7 +28,6 @@
       padding:40px 16px;
       margin:0;
       color:#111;
-
       background:
         radial-gradient(900px 500px at 20% 10%, rgba(129,195,227,.18), transparent 60%),
         radial-gradient(900px 500px at 80% 30%, rgba(185,207,219,.35), transparent 65%),
@@ -91,9 +89,7 @@
       text-align:left;
     }
 
-    .content{
-      padding:26px 22px 22px;
-    }
+    .content{ padding:26px 22px 22px; }
 
     h2{
       margin:0 0 6px;
@@ -124,6 +120,7 @@
       outline:none;
       transition: box-shadow .15s, border-color .15s;
     }
+
     input:focus{
       border-color: var(--c-sky);
       box-shadow:0 0 0 4px rgba(129,195,227,.25);
@@ -138,11 +135,7 @@
       cursor:pointer;
       font-size:16px;
       font-weight:700;
-      transition: transform .05s, filter .15s;
     }
-    button:hover{filter:brightness(1.05)}
-    button:active{transform:scale(.99)}
-    button:disabled{opacity:.6;cursor:not-allowed}
 
     .msg{
       margin:18px auto 6px;
@@ -154,16 +147,16 @@
       max-width:560px;
     }
 
-    .error{
-      border-color:var(--err-border);
-      background:var(--err-bg);
-      color:var(--err-text);
-    }
-
     .ok{
       border-color:var(--ok-border);
       background:var(--ok-bg);
       color:var(--ok-text);
+    }
+
+    .error{
+      border-color:var(--err-border);
+      background:var(--err-bg);
+      color:var(--err-text);
     }
 
     .row{
@@ -173,49 +166,16 @@
       padding:7px 0;
       border-bottom:1px dashed #e8ecf2;
     }
-    .row:last-child{border-bottom:none}
 
     .k{
-      color:#2c3b4a;
       font-weight:800;
       min-width:190px;
     }
 
     .v{
-      color:#111;
       text-align:right;
       flex:1;
       word-break:break-word;
-    }
-
-    .footer{
-      padding:12px 18px 16px;
-      color:#6a7785;
-      font-size:12px;
-    }
-
-    @media (max-width: 520px){
-      body{ padding:18px 12px; }
-      .topbar{ padding:14px 14px; gap:12px; }
-      .logo{ width:72px; height:72px; }
-      .logo img{ width:72px; height:72px; }
-      .content{ padding:20px 14px 16px; }
-
-      .row{
-        flex-direction: column;
-        align-items: flex-start;
-        gap:6px;
-      }
-      .k{ min-width: 0; text-align:left; }
-      .v{
-        width: 100%;
-        text-align:left;
-        white-space: normal;
-        word-break: break-word;
-      }
-
-      input{ max-width: 100%; }
-      button{ width: 100%; max-width: 440px; }
     }
   </style>
 </head>
@@ -223,7 +183,7 @@
 <body>
   <div class="box">
     <div class="topbar">
-      <div class="logo" title="DPI 2026">
+      <div class="logo">
         <img src="./logo.png" alt="Logo DPI 2026">
       </div>
       <div>
@@ -235,7 +195,6 @@
     <div class="content">
       <h2>Validación de Certificado</h2>
       <p class="sub">Ingrese el <b>código</b> del certificado para consultar su estado.</p>
-
       <div class="hint">Ejemplo: DPI26-XX-###</div>
 
       <input id="codigo" placeholder="Código del certificado" autocomplete="off" />
@@ -243,7 +202,6 @@
       <button id="btn" onclick="verificar()">Verificar</button>
 
       <div id="resultado" class="msg" style="display:none;"></div>
-
       <div class="footer">Sistema oficial de validación digital.</div>
     </div>
   </div>
@@ -261,8 +219,9 @@
 
     function escapeHtml(str){
       return String(str)
-        .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+        .replaceAll("&","&amp;")
+        .replaceAll("<","&lt;")
+        .replaceAll(">","&gt;");
     }
 
     function row(k,v){
@@ -270,7 +229,6 @@
     }
 
     function rowHtml(k, htmlValue){
-      // htmlValue viene ya armado (y seguro)
       return `<div class="row"><div class="k">${k}</div><div class="v">${htmlValue}</div></div>`;
     }
 
@@ -286,15 +244,12 @@
       return !s || s.includes("no registra");
     }
 
-    // ✅ Convierte temas con \n, ; o , en lista (bullets)
     function temasToListHtml(val){
       const raw = String(val ?? "").trim();
       if(!raw) return "";
 
-      // separadores: saltos de línea, punto y coma, y comas (pero comas solo si realmente hay varias)
       const parts = raw
-        .split(/\r?\n|;/g)               // primero por salto de línea o ;
-        .flatMap(p => p.split(/,(?=\s*[A-ZÁÉÍÓÚÑ])/g)) // luego por coma antes de MAYÚSCULA (heurística suave)
+        .split(/\r?\n|;/g)
         .map(s => s.trim())
         .filter(Boolean);
 
@@ -306,15 +261,10 @@
       return `<ul style="margin:0; padding-left:18px; text-align:left;">${items}</ul>`;
     }
 
-    $("codigo").addEventListener("keydown", (e) => {
-      if(e.key === "Enter") verificar();
-    });
-
     async function verificar(){
       const codigo = $("codigo").value.trim();
-
       if(!codigo){
-        show("Debe ingresar el <b>código del certificado</b>.", "error");
+        show("Debe ingresar el código.", "error");
         return;
       }
 
@@ -324,87 +274,41 @@
 
       try{
         const url = `${API_URL}?codigo=${encodeURIComponent(codigo)}`;
-        const res = await fetch(url, { method:"GET", cache:"no-store" });
-        const text = await res.text();
-
-        let data;
-        try{ data = JSON.parse(text); } catch(e){
-          show("Error: respuesta no válida del servidor.", "error");
-          return;
-        }
+        const res = await fetch(url);
+        const data = await res.json();
 
         if(data.error){
-          show(`❌ No encontrado.<br><br><b>Detalle:</b> ${escapeHtml(data.error)}`, "error");
+          show("No encontrado.", "error");
           return;
         }
 
-        const tipo = String(data["Tipo de Certificado"] || "").trim().toLowerCase();
+        const tipo = String(data["Tipo de Certificado"] || "").toLowerCase();
+        let html = `<b>✅ Certificado encontrado</b><br><br>` +
+                   row("Código", data["Código"]);
 
-        let html = `<b>✅ Certificado encontrado</b><br><br>` + row("Código", data["Código"]);
-
-        // DOCENTE PONENTE
         if (tipo.includes("docente")) {
-          const titulo = String(data["Título"] || "").trim(); // Dr. / Dra.
-          const nombreDoc = [titulo, data["Nombres completos"], data["Apellidos completos"]]
-            .filter(Boolean)
-            .map(x => String(x).trim())
-            .join(" ");
 
-          const rne = String(data["RNE"] || "").trim();
-          const mostrarRne = rne && !rne.toLowerCase().includes("no registra");
-
-          // ✅ Si Especialidad es "No registra" o vacío, NO mostrarla
-          if(!isNoRegistra(data["Especialidad"])) {
-            html += row("Especialidad", data["Especialidad"]);
-          }
+          const titulo = data["Título"] || "";
+          const nombreDoc = `${titulo} ${data["Nombres completos"]} ${data["Apellidos completos"]}`.trim();
+          const rne = data["RNE"];
 
           html +=
             row("Docente", nombreDoc) +
             row("CMP", data["CMP"]) +
-            (mostrarRne ? row("RNE", rne) : "") +
+            (!isNoRegistra(data["Especialidad"]) ? row("Especialidad", data["Especialidad"]) : "") +
+            (!isNoRegistra(rne) ? row("RNE", rne) : "") +
             rowHtml("Tema dictado", temasToListHtml(data["Tema dictado"])) +
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
-        // COMITÉ
-        } else if (tipo.includes("comité") || tipo.includes("comite")) {
-          const nombre = [data["Nombres completos"], data["Apellidos completos"]]
-            .filter(Boolean)
-            .map(x => String(x).trim())
-            .join(" ");
-
-          html +=
-            row("Miembro", nombre) +
-            row("Cargo", data["Cargo"]) +
-            row("Tipo de certificado", data["Tipo de Certificado"]) +
-            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
-
-        // PARTICIPANTES
         } else {
-          html +=
-            row("Apellidos", data["Apellidos completos"]) +
-            row("Nombres", data["Nombres completos"]) +
-            row("Tipo de usuario", data["Tipo de usuario"]) +
-            row("Modalidad elegida", data["Modalidad elegida"]) +
-            row("Estado", data["Estado"]) +
-            row("Tipo de certificado", data["Tipo de Certificado"]) +
-            row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
+          html += row("Tipo de certificado", data["Tipo de Certificado"]);
         }
 
-        // ✅ 1) Fondo verde para TODOS excepto "no encontrado"
-        // Si es participante usamos Estado; si no, asumimos válido (ok)
-        let cls = "ok";
-        const estado = String(data["Estado"] || "").toLowerCase();
-        if (tipo.includes("aprob") || tipo.includes("asist")) {
-          cls = (estado.includes("valido") || estado.includes("válido")) ? "ok" : "error";
-        } else {
-          cls = "ok"; // comité/docente siempre verde si existe registro
-        }
+        show(html, "ok");
 
-        show(html, cls);
-
-      }catch(err){
-        show("Error: no se pudo conectar con el servidor. Intente nuevamente.", "error");
-      }finally{
+      } catch(err){
+        show("Error de conexión.", "error");
+      } finally{
         btn.disabled = false;
         btn.textContent = "Verificar";
       }
