@@ -217,6 +217,12 @@
     const API_URL = "https://script.google.com/macros/s/AKfycbyUB8qaHh1r_Ygo1KvMQOKeRuUqlJCRTSMe3fvkuHfNOqVkpnGzrjCYR8Q0Omu-v6Xm/exec";
     const $ = (id) => document.getElementById(id);
 
+    // ✅ Permite verificar presionando ENTER
+$("codigo").addEventListener("keydown", function(e){
+  if(e.key === "Enter"){
+    verificar();
+  }
+});
     function show(html, type){
       const r = $("resultado");
       r.style.display = "block";
