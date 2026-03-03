@@ -21,7 +21,6 @@
 
     *{box-sizing:border-box}
 
-    /* ✅ NUEVO: evita "franjas" del fondo */
     html, body{height:100%}
 
     body{
@@ -31,7 +30,6 @@
       margin:0;
       color:#111;
 
-      /* ✅ NUEVO: fondo suave sin cortes */
       background:
         radial-gradient(900px 500px at 20% 10%, rgba(129,195,227,.18), transparent 60%),
         radial-gradient(900px 500px at 80% 30%, rgba(185,207,219,.35), transparent 65%),
@@ -45,11 +43,10 @@
       max-width:640px;
       margin:0 auto;
       box-shadow:0 10px 30px rgba(0,0,0,.10);
-      overflow:hidden; /* para que el header se vea perfecto */
+      overflow:hidden;
       border:1px solid rgba(0,0,0,.04);
     }
 
-    /* HEADER */
     .topbar{
       display:flex;
       align-items:center;
@@ -59,7 +56,6 @@
       color:#fff;
     }
 
-    /* ✅ Logo MÁS grande pero elegante */
     .logo{
       width:92px;
       height:92px;
@@ -80,7 +76,6 @@
       box-shadow:0 10px 22px rgba(0,0,0,.28);
     }
 
-    /* Un poquito más de jerarquía tipográfica */
     .topbar .t1{
       font-weight:800;
       font-size:18px;
@@ -96,7 +91,6 @@
       text-align:left;
     }
 
-    /* CONTENIDO */
     .content{
       padding:26px 22px 22px;
     }
@@ -200,42 +194,26 @@
       font-size:12px;
     }
 
-    /* ✅ Responsive: móvil */
     @media (max-width: 520px){
-
       body{ padding:18px 12px; }
-
-      .topbar{
-        padding:14px 14px;
-        gap:12px;
-      }
-
-      /* logo un poco más chico en móvil para que no empuje el título */
+      .topbar{ padding:14px 14px; gap:12px; }
       .logo{ width:72px; height:72px; }
       .logo img{ width:72px; height:72px; }
-
       .content{ padding:20px 14px 16px; }
 
-      /* ✅ La clave: filas en columna */
       .row{
         flex-direction: column;
         align-items: flex-start;
         gap:6px;
       }
-
-      .k{
-        min-width: 0;         /* quita el “bloque fijo” */
-        text-align:left;
-      }
-
+      .k{ min-width: 0; text-align:left; }
       .v{
         width: 100%;
-        text-align:left;      /* antes estaba right */
-        white-space: normal;  /* permite saltos normales */
+        text-align:left;
+        white-space: normal;
         word-break: break-word;
       }
 
-      /* input y botón ocupan mejor el ancho */
       input{ max-width: 100%; }
       button{ width: 100%; max-width: 440px; }
     }
@@ -244,10 +222,8 @@
 
 <body>
   <div class="box">
-    <!-- HEADER con logo -->
     <div class="topbar">
       <div class="logo" title="DPI 2026">
-        <!-- ✅ tu logo del repo -->
         <img src="./logo.png" alt="Logo DPI 2026">
       </div>
       <div>
@@ -262,11 +238,7 @@
 
       <div class="hint">Ejemplo: DPI26-XX-###</div>
 
-      <input
-        id="codigo"
-        placeholder="Código del certificado"
-        autocomplete="off"
-      />
+      <input id="codigo" placeholder="Código del certificado" autocomplete="off" />
       <br />
       <button id="btn" onclick="verificar()">Verificar</button>
 
@@ -277,8 +249,7 @@
   </div>
 
   <script>
-    // ✅ Tu Apps Script Web App (URL /exec) - NO CAMBIAR si ya funciona
-    const API_URL = "https://script.google.com/macros/s/AKfycbyYgipvzs00ToOr1I_B6kS67J5DmLv8VYvPuMF2cvQC7M4YG7suo3rYjIQ7xJ364pmQ/exec";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyUB8qaHh1r_Ygo1KvMQOKeRuUqlJCRTSMe3fvkuHfNOqVkpnGzrjCYR8Q0Omu-v6Xm/exec";
     const $ = (id) => document.getElementById(id);
 
     function show(html, type){
@@ -288,14 +259,19 @@
       r.innerHTML = html;
     }
 
-    function row(k,v){
-      return `<div class="row"><div class="k">${k}</div><div class="v">${escapeHtml(String(v ?? ""))}</div></div>`;
-    }
-
     function escapeHtml(str){
       return String(str)
         .replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;")
         .replaceAll('"',"&quot;").replaceAll("'","&#039;");
+    }
+
+    function row(k,v){
+      return `<div class="row"><div class="k">${k}</div><div class="v">${escapeHtml(String(v ?? ""))}</div></div>`;
+    }
+
+    function rowHtml(k, htmlValue){
+      // htmlValue viene ya armado (y seguro)
+      return `<div class="row"><div class="k">${k}</div><div class="v">${htmlValue}</div></div>`;
     }
 
     function formatFecha(val){
@@ -305,7 +281,31 @@
       return String(val);
     }
 
-    // ✅ Enter SOLO funciona en el input
+    function isNoRegistra(val){
+      const s = String(val ?? "").trim().toLowerCase();
+      return !s || s.includes("no registra");
+    }
+
+    // ✅ Convierte temas con \n, ; o , en lista (bullets)
+    function temasToListHtml(val){
+      const raw = String(val ?? "").trim();
+      if(!raw) return "";
+
+      // separadores: saltos de línea, punto y coma, y comas (pero comas solo si realmente hay varias)
+      const parts = raw
+        .split(/\r?\n|;/g)               // primero por salto de línea o ;
+        .flatMap(p => p.split(/,(?=\s*[A-ZÁÉÍÓÚÑ])/g)) // luego por coma antes de MAYÚSCULA (heurística suave)
+        .map(s => s.trim())
+        .filter(Boolean);
+
+      if(parts.length <= 1){
+        return escapeHtml(raw);
+      }
+
+      const items = parts.map(t => `<li>${escapeHtml(t)}</li>`).join("");
+      return `<ul style="margin:0; padding-left:18px; text-align:left;">${items}</ul>`;
+    }
+
     $("codigo").addEventListener("keydown", (e) => {
       if(e.key === "Enter") verificar();
     });
@@ -338,14 +338,13 @@
           return;
         }
 
-        // ✅ NUEVO: armado dinámico según "Tipo de Certificado" (sin cambiar diseño)
         const tipo = String(data["Tipo de Certificado"] || "").trim().toLowerCase();
 
         let html = `<b>✅ Certificado encontrado</b><br><br>` + row("Código", data["Código"]);
 
-        // 1) DOCENTE PONENTE
+        // DOCENTE PONENTE
         if (tipo.includes("docente")) {
-          const titulo = String(data["Título"] || "").trim(); // "Dr." / "Dra."
+          const titulo = String(data["Título"] || "").trim(); // Dr. / Dra.
           const nombreDoc = [titulo, data["Nombres completos"], data["Apellidos completos"]]
             .filter(Boolean)
             .map(x => String(x).trim())
@@ -354,15 +353,19 @@
           const rne = String(data["RNE"] || "").trim();
           const mostrarRne = rne && !rne.toLowerCase().includes("no registra");
 
+          // ✅ Si Especialidad es "No registra" o vacío, NO mostrarla
+          if(!isNoRegistra(data["Especialidad"])) {
+            html += row("Especialidad", data["Especialidad"]);
+          }
+
           html +=
             row("Docente", nombreDoc) +
-            row("Especialidad", data["Especialidad"]) +
             row("CMP", data["CMP"]) +
             (mostrarRne ? row("RNE", rne) : "") +
-            row("Tema dictado", data["Tema dictado"]) +
+            rowHtml("Tema dictado", temasToListHtml(data["Tema dictado"])) +
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
-        // 2) MIEMBRO DEL COMITÉ ORGANIZADOR
+        // COMITÉ
         } else if (tipo.includes("comité") || tipo.includes("comite")) {
           const nombre = [data["Nombres completos"], data["Apellidos completos"]]
             .filter(Boolean)
@@ -375,7 +378,7 @@
             row("Tipo de certificado", data["Tipo de Certificado"]) +
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
 
-        // 3) PARTICIPANTES (APROBADO / ASISTENTE)
+        // PARTICIPANTES
         } else {
           html +=
             row("Apellidos", data["Apellidos completos"]) +
@@ -387,8 +390,16 @@
             row("Fecha de emisión", formatFecha(data["Fecha de emisión"]));
         }
 
+        // ✅ 1) Fondo verde para TODOS excepto "no encontrado"
+        // Si es participante usamos Estado; si no, asumimos válido (ok)
+        let cls = "ok";
         const estado = String(data["Estado"] || "").toLowerCase();
-        const cls = (estado.includes("valido") || estado.includes("válido")) ? "ok" : "error";
+        if (tipo.includes("aprob") || tipo.includes("asist")) {
+          cls = (estado.includes("valido") || estado.includes("válido")) ? "ok" : "error";
+        } else {
+          cls = "ok"; // comité/docente siempre verde si existe registro
+        }
+
         show(html, cls);
 
       }catch(err){
